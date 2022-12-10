@@ -1,0 +1,1 @@
+function run; cp $argv[1] _temp.py && python3 _temp.py < in.txt && rm _temp.py; end
