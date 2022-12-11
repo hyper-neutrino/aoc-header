@@ -17,11 +17,6 @@ def _(self):
     return lines(self)
 
 
-@as_curse(str, "list")
-def _(self):
-    return list(self)
-
-
 @as_curse(str, "length")
 @property
 def _(self):

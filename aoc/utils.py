@@ -87,3 +87,8 @@ rbor_ = lambda x, y: y | x
 rxor_ = lambda x, y: y ^ x
 ylshift_ = lambda x, y: y << x
 rrshift_ = lambda x, y: y >> x
+
+upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+lower = "abcdefghijklmnopqrstuvwxyz"
+Aa = upper + lower
+aA = lower + upper

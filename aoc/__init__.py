@@ -1,3 +1,5 @@
+from .curses.dicts import *
+from .curses.functions import *
 from .curses.lists import *
 from .curses.objects import *
 from .curses.sets import *

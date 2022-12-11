@@ -2,6 +2,7 @@ import itertools
 
 from .vector import vector
 from ..utils import as_curse, list_like
+from ..util_functions import product
 
 _list_sort = list.sort
 
@@ -20,6 +21,23 @@ def tl_pass(o, x, y):
             return [y(k) if x == k else k for k in o]
         else:
             return [y if x == k else k for k in o]
+
+
+def vtl_pass(o, x, y):
+    fx = type(x) == type(lambda: 0)
+    fy = type(y) == type(lambda: 0)
+
+    r = []
+
+    for k in o:
+        if type(k) in list_like:
+            r.append(type(k)(vtl_pass(k, x, y)))
+        elif x(k) if fx else k == x:
+            r.append(y(k) if fy else y)
+        else:
+            r.append(k)
+
+    return r
 
 
 @as_curse(list, "shift")
@@ -82,13 +100,30 @@ for tp in [list, tuple, set]:
                     "Translation requires either two values or a dictionary."
                 )
 
-            output = tp(self[:])
+            output = tp(self)
 
             if y is None:
                 for x, y in x.items():
                     output = tp(tl_pass(output, x, y))
             else:
                 output = tp(tl_pass(output, x, y))
+
+            return output
+
+        @as_curse(tp, "vtl")
+        def _(self, x, y=None):
+            if y is None and type(x) != dict:
+                raise RuntimeError(
+                    "Translation requires either two values or a dictionary."
+                )
+
+            output = tp(self)
+
+            if y is None:
+                for x, y in x.items():
+                    output = tp(vtl_pass(output, x, y))
+            else:
+                output = tp(vtl_pass(output, x, y))
 
             return output
 
@@ -208,6 +243,10 @@ for tp in [list, tuple, set]:
             def _(self, other):
                 if type(other) in list_like:
                     return tp(tp(tp([x, y]) for y in other) for x in self)
+                elif type(other) == int and other > 0:
+                    if other == 1:
+                        return tp(tp2([x]) for x in self)
+                    return tp(tp2([x, *k]) for x in self for k in self ** (other - 1))
                 return NotImplemented
 
             @as_curse(tp, "__floordiv__")
@@ -316,6 +355,10 @@ for tp in [list, tuple, set]:
         def _(self, initial=0):
             return sum(self, initial)
 
+        @as_curse(tp, "product")
+        def _(self, initial=1):
+            return product(self, initial)
+
         @as_curse(tp, "all")
         def _(self, f):
             return all(f(x) for x in self)
@@ -412,7 +455,7 @@ for tp in [list, tuple, set]:
 
     _(tp)
 
-for tp in [list, set, tuple, vector]:
+for tp in [list, set, tuple, vector, str]:
 
     @as_curse(tp, "l")
     @property
