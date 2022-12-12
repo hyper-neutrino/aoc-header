@@ -12,7 +12,7 @@ def _(self, f, *args, **kwargs):
     return self
 
 
-@as_curse(object, "starinvoke")
+@as_curse(object, "invokesplat")
 def _(self, f, *args, **kwargs):
     f(*self, *args, **kwargs)
     return self
@@ -23,7 +23,7 @@ def _(self, f, *args, **kwargs):
     return f(self, *args, **kwargs)
 
 
-@as_curse(object, "starcall")
+@as_curse(object, "callsplat")
 def _(self, f, *args, **kwargs):
     return f(*self, *args, **kwargs)
 

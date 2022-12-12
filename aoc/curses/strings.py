@@ -30,7 +30,7 @@ def _(self):
 
 @as_curse(str, "tl")
 def _(self, x, y=None):
-    return self.list().tl(x, y)
+    return self.l.tl(x, y)
 
 
 @as_curse(str, "__mul__")

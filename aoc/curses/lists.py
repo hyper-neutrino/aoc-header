@@ -360,15 +360,15 @@ for tp in [list, tuple, set]:
             return product(self, initial)
 
         @as_curse(tp, "all")
-        def _(self, f):
+        def _(self, f=lambda x: x):
             return all(f(x) for x in self)
 
         @as_curse(tp, "any")
-        def _(self, f):
+        def _(self, f=lambda x: x):
             return any(f(x) for x in self)
 
         @as_curse(tp, "anyall")
-        def _(self, f):
+        def _(self, f=lambda x: x):
             return self and self.all(f)
 
         @as_curse(tp, "vmap")
@@ -396,7 +396,7 @@ for tp in [list, tuple, set]:
             return tp(o)
 
         @as_curse(tp, "join")
-        def _(self, x):
+        def _(self, x=""):
             if type(x) == str:
                 return x.join(map(str, self))
             return NotImplemented
@@ -418,7 +418,7 @@ for tp in [list, tuple, set]:
             return tp(map(tp2, itertools.permutations(self, r)))
 
         @as_curse(tp, "countby")
-        def _(self, f):
+        def _(self, f=lambda x: bool(x)):
             return sum(map(bool, map(f, self)))
 
         @as_curse(tp, "minimal")
