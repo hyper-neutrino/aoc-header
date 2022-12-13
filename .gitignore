@@ -1,6 +1,7 @@
 in.txt
 test.txt
 main.py
+x.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
