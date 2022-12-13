@@ -1,5 +1,7 @@
 import hashlib, math, re
+
 from .ocr_data import *
+from .utils import list_like
 
 
 def invert(f):
@@ -99,22 +101,38 @@ def product(x, initial=1):
     return t
 
 
-_pyrange = range
+xrange = range
 
 
-def range(*a):
-    return list(_pyrange(*a))
+def range(x, y=None, z=None, /):
+    assert (
+        isinstance(x, (int, float))
+        and (y is None or isinstance(y, (int, float)))
+        and (z is None or isinstance(z, (int, float)))
+    )
+
+    if y is None:
+        return list(xrange(int(math.ceil(x))))
+    if z is None:
+        return (range(y - x).v + x).l
+    return (range((y - x) / z).v * z + x).l
 
 
-_pyzip = zip
+xzip = zip
 
 
 def zip(*a):
-    return list(map(list, _pyzip(*a)))
+    return list(map(list, xzip(*a)))
+
+
+xmap = map
 
 
 def map(f, a):
     return [f(x) for x in a]
+
+
+xenum = enumerate
 
 
 def enumerate(a):
@@ -193,3 +211,13 @@ def josephus(x, k):
     for i in range(2, x + 1):
         j = (j + k - 1) % i + 1
     return j
+
+
+def sign(x):
+    if type(x) in list_like:
+        return type(x)(map(sign, x))
+    if x == 0:
+        return 0
+    if type(x) == complex:
+        return sign(x.real) + sign(x.imag) * 1j
+    return 1 if x > 0 else -1

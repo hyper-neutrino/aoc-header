@@ -16,6 +16,10 @@ class AOC_IO:
         return self.raw.strip("\n")
 
     @property
+    def blocks(self):
+        return self.data.split("\n\n")
+
+    @property
     def lines(self):
         return self.data.splitlines()
 

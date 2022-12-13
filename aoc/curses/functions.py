@@ -1,10 +1,9 @@
+import types
+
 from ..utils import as_curse
 
 
-function = type(lambda: 0)
-
-
-@as_curse(function, "__and__")
+@as_curse(types.FunctionType, "__and__")
 def _(self, x):
     def _(x):
         def f(*a, **k):

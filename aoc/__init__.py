@@ -8,5 +8,6 @@ from .curses.strings import *
 
 from .aoc_io import *
 
+
 from .utils import *
 from .util_functions import *

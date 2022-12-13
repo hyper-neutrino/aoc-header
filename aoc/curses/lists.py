@@ -1,15 +1,15 @@
-import itertools
+import itertools, types
 
 from .vector import vector
 from ..utils import as_curse, list_like
-from ..util_functions import product
+from ..util_functions import product, xrange
 
 _list_sort = list.sort
 
 
 def tl_pass(o, x, y):
-    fx = type(x) == type(lambda: 0)
-    fy = type(y) == type(lambda: 0)
+    fx = type(x) == types.FunctionType
+    fy = type(y) == types.FunctionType
 
     if fx:
         if fy:
@@ -24,8 +24,8 @@ def tl_pass(o, x, y):
 
 
 def vtl_pass(o, x, y):
-    fx = type(x) == type(lambda: 0)
-    fy = type(y) == type(lambda: 0)
+    fx = type(x) == types.FunctionType
+    fy = type(y) == types.FunctionType
 
     r = []
 
@@ -73,6 +73,29 @@ def _(self, *, key=None, reverse=False):
 def _(self):
     self[:] = self[::-1]
     return self
+
+
+@as_curse(list, "swap")
+def _(self, x, y):
+    self[x], self[y] = self[y], self[x]
+
+
+for tp in [list, tuple]:
+
+    def _(tp):
+        @as_curse(tp, "sortq")
+        def _(self, *, key=None, reverse=False):
+            if len(self) < 2:
+                return True
+            k = self[0] if key is None else key(self[0])
+            for i in xrange(1, len(self)):
+                n = self[i] if key is None else key(self[i])
+                if n > k if reverse else n < k:
+                    return False
+                k = n
+            return True
+
+    _(tp)
 
 
 for tp in [list, tuple, set]:
@@ -131,9 +154,17 @@ for tp in [list, tuple, set]:
         def _(self, f=lambda x: x):
             return tp(x for x in self if f(x))
 
+        @as_curse(tp, "filtersplat")
+        def _(self, f=any):
+            return tp(x for x in self if f(*x))
+
         @as_curse(tp, "filterout")
         def _(self, f=lambda x: x):
             return tp(x for x in self if not f(x))
+
+        @as_curse(tp, "filteroutsplat")
+        def _(self, f=all):
+            return tp(x for x in self if not f(*x))
 
         if tp != set:
 
@@ -476,3 +507,17 @@ for tp in [list, set, tuple, vector, str]:
     @property
     def _(self):
         return vector(self)
+
+    @as_curse(tp, "idx")
+    def _(self, index):
+        if type(index) == int:
+            return self[index % len(self)]
+        if type(index) == float:
+            if index % 1 == 0:
+                return self[index % len(self)]
+            return (self[int(index) % len(self)], self[int(index + 1) % len(self)])
+        if type(index) in [list, tuple, vector]:
+            if len(index) == 1:
+                return self[index[0] % len(self)]
+            return self[index[0] % len(self)].idx(index[1:])
+        raise NotImplementedError

@@ -1,4 +1,5 @@
 import re
+from collections import deque
 from forbiddenfruit import curse
 
 
@@ -22,17 +23,37 @@ def as_curse(klass, name):
 
 list_like = [list, set, tuple, enumerate, map, zip]
 
-d2c = {">": 1, "<": -1, "^": 1j, "v": -1j, "R": 1, "L": -1, "U": 1j, "D": -1j}
-d2p = {
-    ">": [1, 0],
-    "<": [-1, 0],
-    "^": [0, 1],
-    "v": [0, -1],
-    "R": [1, 0],
-    "L": [-1, 0],
-    "U": [0, 1],
-    "D": [0, -1],
-}
+d2c = {}
+d2p = {}
+
+for v, c in [
+    (1, ">RrEe"),
+    (-1, "<LlWw"),
+    (1j, "^UuNn"),
+    (-1j, "vDdSs"),
+    (1 + 1j, ["UR", "ur", "NE", "ne"]),
+    (1 - 1j, ["DR", "dr", "SE", "se"]),
+    (-1 - 1j, ["DL", "dl", "SW", "sw"]),
+    (-1 + 1j, ["UL", "ul", "NW", "nw"]),
+]:
+    for k in c:
+        d2c[k] = v
+        d2p[k] = (int(v.real), int(v.imag))
+
+h2c = {}
+h2p = {}
+
+for v, c in [
+    (1 + 1j, ["UR", "ur", "NE", "ne"]),
+    (1 - 1j, ["DR", "dr", "SE", "se"]),
+    (-2j, "DdSs"),
+    (-1 - 1j, ["DL", "dl", "SW", "sw"]),
+    (-1 + 1j, ["UL", "ul", "NW", "nw"]),
+    (2j, "UuNn"),
+]:
+    for k in c:
+        h2c[k] = v
+        h2p[k] = (int(v.real), int(v.imag))
 
 add_ = lambda x, y: x + y
 sub_ = lambda x, y: x - y
@@ -101,3 +122,61 @@ upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 lower = "abcdefghijklmnopqrstuvwxyz"
 Aa = upper + lower
 aA = lower + upper
+
+
+class permutation:
+    def __init__(self, x):
+        assert type(x) == list and sorted(x) == list(range(len(x)))
+        self.x = x
+
+    def __repr__(self):
+        return "P[" + self.x.join(", ") + "]"
+
+    def parse(start, end):
+        assert len(start) == len(end)
+        s = start.l
+        e = end.l
+        return permutation(e.map(s.index))
+
+    def apply(self, x):
+        assert len(x) == len(self.x)
+        return [x[i] for i in self.x]
+
+    def mutate(self, x):
+        x[:] = self.apply(x)
+        return x
+
+    def __mul__(self, x):
+        if type(x) != permutation:
+            return NotImplemented
+        assert len(x.x) == len(self.x)
+        return permutation([self.x[i] for i in x.x])
+
+    def inverse(self):
+        o = [None] * len(self.x)
+        for i, e in enumerate(self.x):
+            o[e] = i
+        return permutation(o)
+
+    def __pow__(self, x):
+        assert type(x) == int
+
+        if x == 0:
+            return permutation(list(range(len(self.x))))
+        if x == 1:
+            return self
+        if x == -1:
+            return self.inverse()
+        if x < 0:
+            return self.inverse() ** -x
+
+        r = permutation(list(range(len(self.x))))
+        c = permutation(self.x)
+
+        while x:
+            if x & 1:
+                r *= c
+            x >>= 1
+            c *= c
+
+        return r

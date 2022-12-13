@@ -46,3 +46,8 @@ def _(self, x):
 @as_curse(object, "selfie")
 def _(self, f):
     return f(self, self)
+
+
+@as_curse(object, "invariant")
+def _(self, f):
+    return self == f(self)
